@@ -3,7 +3,7 @@ name = "cerberus-shepherd"
 version = "0.1.0"
 description = "Cerberus Shepherd Python Bindings - Operator harness for the Cerberus swarm"
 readme = "README.md"
-license = {text = "MIT OR Apache-2.0"}
+license = {text = "AGPL-3.0"}
 authors = [{name = "Cerberus Team", email = "team@cerberus.local"}]
 maintainers = [{name = "Cerberus Team", email = "team@cerberus.local"}]
 keywords = ["cerberus", "cybersecurity", "distributed-systems", "swarm-intelligence"]
@@ -12,8 +12,7 @@ classifiers = [
     "Intended Audience :: Developers",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
-    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: GNU Affero General Public License v3 or later (AGPLv3+)",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",

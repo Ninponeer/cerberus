@@ -2,7 +2,7 @@
 name = "cerberus-bitnet-sys"
 version = "0.1.0"
 edition = "2024"
-license = "MIT OR Apache-2.0"
+license = { workspace = true }
 description = "FFI bindings for bitnet.cpp (1.58-bit LLM inference)"
 repository = "https://github.com/cerberus-project/cerberus"
 links = "bitnet"

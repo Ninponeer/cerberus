@@ -119,6 +119,18 @@ Cerberus sits in the same constellation as:
 # TBD - project scaffolding in progress
 ```
 
-## License
+## Licensing & Commercial Deployments
 
-Research initiative: not a product. See LICENSE-MIT and LICENSE-APACHE for terms.
+Project Cerberus is distributed under a **Dual-Licensing Model**:
+
+### Community & Research Edition
+* The public source code is licensed under the **GNU Affero General Public License v3.0 (AGPLv3)**.
+* Independent security researchers, academic institutions, and homelab defense operators are free to inspect, audit, modify, and run Cerberus under AGPLv3 terms. See [LICENSE](LICENSE) for full details.
+
+### Enterprise & Commercial Licensing
+* For managed service providers (MSPs), security operations centers (SOCs), hardware appliance integrators, or organizations requiring closed-source deployment, custom SLAs, or proprietary integration without AGPLv3 copyleft obligations:
+* **Commercial Proprietary Licenses** are available exclusively through the Project Lead (Rick Metz / Feathercloak).
+* Commercial inquiries: `licensing@cerberus.local` (or direct inquiry via Feathercloak).
+
+### Contributions
+All outside contributions require acceptance of the [Contributor License Agreement (CLA)](CLA.md). See [CONTRIBUTING.md](CONTRIBUTING.md) for details.

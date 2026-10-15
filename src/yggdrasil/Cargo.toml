@@ -1,0 +1,56 @@
+[package]
+name = "cerberus-yggdrasil"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+categories = { workspace = true }
+keywords = ["yggdrasil", "knowledge-graph", "postgresql", "age", "cypher"]
+description = "Yggdrasil - The Memory Tree: Append-only knowledge graph, behavioral lineage, trust scores"
+
+[dependencies]
+cerberus-core = { path = "../core", features = ["prost"] }
+tokio = { workspace = true, features = ["full", "tracing"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+bytes = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true, optional = true }
+prost-types = { workspace = true, optional = true }
+rustls = { workspace = true }
+ed25519-dalek = { workspace = true }
+sqlx = { workspace = true }
+redis = { workspace = true }
+config = { workspace = true }
+figment = { workspace = true }
+metrics = { workspace = true }
+prometheus = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry-otlp = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+rocksdb = { workspace = true }
+tempfile = "3.10"
+clap = { workspace = true }
+async-graphql = "7.0"
+async-graphql-axum = "7.0"
+axum = "0.7"
+tower = "0.4"
+
+[dev-dependencies]
+testcontainers = { workspace = true }
+proptest = { workspace = true }
+mockall = { workspace = true }
+
+[[bin]]
+name = "yggdrasil"
+path = "src/main.rs"
+
+[features]
+default = []

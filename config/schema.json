@@ -1,0 +1,568 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema#",
+  "$id": "https://cerberus.local/schemas/config/v1.json",
+  "title": "Cerberus Configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["global", "fenrir", "garmr", "orthrus", "pack", "yggdrasil"],
+  "properties": {
+    "global": {
+      "type": "object",
+      "required": ["project_name", "environment", "spiffe_trust_domain", "log_level"],
+      "properties": {
+        "project_name": { "type": "string", "const": "cerberus" },
+        "environment": { "type": "string", "enum": ["development", "staging", "production", "air-gapped"] },
+        "spiffe_trust_domain": { "type": "string", "pattern": "^[a-z0-9.-]+$" },
+        "log_level": { "type": "string", "enum": ["trace", "debug", "info", "warn", "error"] },
+        "metrics_enabled": { "type": "boolean", "default": true },
+        "tracing_enabled": { "type": "boolean", "default": true }
+      }
+    },
+    "fenrir": { "$ref": "#/$defs/fenrirConfig" },
+    "garmr": { "$ref": "#/$defs/garmrConfig" },
+    "orthrus": { "$ref": "#/$defs/orthrusConfig" },
+    "pack": { "$ref": "#/$defs/packConfig" },
+    "yggdrasil": { "$ref": "#/$defs/yggdrasilConfig" },
+    "research_branches": {
+      "type": "object",
+      "properties": {
+        "hugin": { "$ref": "#/$defs/huginConfig" },
+        "munin": { "$ref": "#/$defs/muninConfig" },
+        "skoll": { "$ref": "#/$defs/skollConfig" },
+        "hati": { "$ref": "#/$defs/hatiConfig" },
+        "heimdall": { "$ref": "#/$defs/heimdallConfig" },
+        "sleipnir": { "$ref": "#/$defs/sleipnirConfig" }
+      }
+    }
+  },
+  "$defs": {
+    "fenrirConfig": {
+      "type": "object",
+      "required": ["modules", "yggdrasil_sync", "output"],
+      "properties": {
+        "modules": {
+          "type": "object",
+          "properties": {
+            "dns_anomaly": { "$ref": "#/$defs/moduleConfig" },
+            "binary_reputation": { "$ref": "#/$defs/moduleConfig" },
+            "beaconing_detector": { "$ref": "#/$defs/moduleConfig" },
+            "injection_detector": { "$ref": "#/$defs/moduleConfig" },
+            "credential_abuse": { "$ref": "#/$defs/moduleConfig" },
+            "lateral_movement": { "$ref": "#/$defs/moduleConfig" }
+          }
+        },
+        "yggdrasil_sync": {
+          "type": "object",
+          "required": ["interval_sec", "baseline_cache_ttl_sec"],
+          "properties": {
+            "interval_sec": { "type": "integer", "minimum": 60, "maximum": 3600 },
+            "baseline_cache_ttl_sec": { "type": "integer", "minimum": 300, "maximum": 86400 }
+          }
+        },
+        "output": {
+          "type": "object",
+          "required": ["garmr_endpoints", "batch_size", "flush_interval_sec"],
+          "properties": {
+            "garmr_endpoints": { "type": "array", "items": { "type": "string", "format": "uri" }, "minItems": 1 },
+            "batch_size": { "type": "integer", "minimum": 1, "maximum": 1000 },
+            "flush_interval_sec": { "type": "integer", "minimum": 1, "maximum": 60 }
+          }
+        }
+      }
+    },
+    "garmrConfig": {
+      "type": "object",
+      "required": ["consensus", "correlation", "confidence", "yggdrasil", "orthrus", "ha"],
+      "properties": {
+        "consensus": {
+          "type": "object",
+          "required": ["min_agents", "agreement_threshold", "probation_weight", "min_trust_for_vote"],
+          "properties": {
+            "min_agents": { "type": "integer", "minimum": 3, "maximum": 100 },
+            "agreement_threshold": { "type": "number", "minimum": 0.5, "maximum": 1.0 },
+            "probation_weight": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+            "min_trust_for_vote": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+          }
+        },
+        "correlation": {
+          "type": "object",
+          "required": ["temporal_window_sec", "min_observations_per_cluster", "max_cluster_span_sec", "entity_resolution"],
+          "properties": {
+            "temporal_window_sec": { "type": "integer", "minimum": 60, "maximum": 3600 },
+            "min_observations_per_cluster": { "type": "integer", "minimum": 2, "maximum": 100 },
+            "max_cluster_span_sec": { "type": "integer", "minimum": 300, "maximum": 7200 },
+            "entity_resolution": {
+              "type": "object",
+              "required": ["user_fields", "host_fields", "process_fields", "network_fields"],
+              "properties": {
+                "user_fields": { "type": "array", "items": { "type": "string" } },
+                "host_fields": { "type": "array", "items": { "type": "string" } },
+                "process_fields": { "type": "array", "items": { "type": "string" } },
+                "network_fields": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "confidence": {
+          "type": "object",
+          "required": ["thresholds", "technique_weights"],
+          "properties": {
+            "thresholds": {
+              "type": "object",
+              "required": ["benign", "suspicious", "probable"],
+              "properties": {
+                "benign": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+                "suspicious": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+                "probable": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+              }
+            },
+            "technique_weights": {
+              "type": "object",
+              "additionalProperties": { "type": "number", "minimum": 0.1, "maximum": 5.0 }
+            }
+          }
+        },
+        "yggdrasil": {
+          "type": "object",
+          "required": ["endpoint", "trust_cache_ttl_sec", "baseline_cache_ttl_sec"],
+          "properties": {
+            "endpoint": { "type": "string", "format": "uri" },
+            "trust_cache_ttl_sec": { "type": "integer", "minimum": 10, "maximum": 3600 },
+            "baseline_cache_ttl_sec": { "type": "integer", "minimum": 60, "maximum": 86400 }
+          }
+        },
+        "orthrus": {
+          "type": "object",
+          "required": ["endpoints", "trigger_threshold"],
+          "properties": {
+            "endpoints": { "type": "array", "items": { "type": "string", "format": "uri" }, "minItems": 1 },
+            "trigger_threshold": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+          }
+        },
+        "ha": {
+          "type": "object",
+          "required": ["raft_election_timeout_ms", "heartbeat_interval_ms"],
+          "properties": {
+            "raft_election_timeout_ms": { "type": "integer", "minimum": 1000, "maximum": 30000 },
+            "heartbeat_interval_ms": { "type": "integer", "minimum": 100, "maximum": 5000 }
+          }
+        }
+      }
+    },
+    "orthrusConfig": {
+      "type": "object",
+      "required": ["execution", "network_isolate", "credential_suspend", "microsegment", "decoy", "traffic_redirect", "shepherd_override", "yggdrasil"],
+      "properties": {
+        "execution": {
+          "type": "object",
+          "required": ["max_concurrent_actions", "action_timeout_sec", "retry_attempts", "retry_backoff_sec"],
+          "properties": {
+            "max_concurrent_actions": { "type": "integer", "minimum": 1, "maximum": 500 },
+            "action_timeout_sec": { "type": "integer", "minimum": 30, "maximum": 3600 },
+            "retry_attempts": { "type": "integer", "minimum": 0, "maximum": 10 },
+            "retry_backoff_sec": { "type": "integer", "minimum": 1, "maximum": 60 }
+          }
+        },
+        "network_isolate": {
+          "type": "object",
+          "required": ["default_mode", "isolation_vlan", "management_cidrs", "pcap_duration_sec"],
+          "properties": {
+            "default_mode": { "type": "string", "enum": ["vlan", "acl", "host_firewall", "switch_port"] },
+            "isolation_vlan": { "type": "integer", "minimum": 1, "maximum": 4094 },
+            "management_cidrs": { "type": "array", "items": { "type": "string", "format": "ipv4" } },
+            "pcap_duration_sec": { "type": "integer", "minimum": 60, "maximum": 3600 }
+          }
+        },
+        "credential_suspend": {
+          "type": "object",
+          "required": ["default_scope", "preserve_forensics", "memory_capture_authorized"],
+          "properties": {
+            "default_scope": { "type": "string", "enum": ["domain", "local", "cloud", "all"] },
+            "preserve_forensics": { "type": "boolean" },
+            "memory_capture_authorized": { "type": "boolean" }
+          }
+        },
+        "microsegment": {
+          "type": "object",
+          "required": ["enforcement_points"],
+          "properties": {
+            "enforcement_points": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": ["type"],
+                "properties": {
+                  "type": { "type": "string", "enum": ["firewall", "sase", "host_agent", "switch_acl"] },
+                  "api_endpoint": { "type": "string", "format": "uri" },
+                  "credentials": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "decoy": {
+          "type": "object",
+          "required": ["profiles_dir", "artifact_store"],
+          "properties": {
+            "profiles_dir": { "type": "string" },
+            "artifact_store": { "type": "string", "format": "uri" }
+          }
+        },
+        "traffic_redirect": {
+          "type": "object",
+          "required": ["sinkhole_domain", "proxy_endpoint", "collector_endpoint"],
+          "properties": {
+            "sinkhole_domain": { "type": "string" },
+            "proxy_endpoint": { "type": "string", "format": "uri" },
+            "collector_endpoint": { "type": "string", "format": "uri" }
+          }
+        },
+        "shepherd_override": {
+          "type": "object",
+          "required": ["mfa_required", "allowed_operators", "break_glass_keys", "threshold"],
+          "properties": {
+            "mfa_required": { "type": "boolean" },
+            "allowed_operators": { "type": "array", "items": { "type": "string", "pattern": "^spiffe://" } },
+            "break_glass_keys": { "type": "array", "items": { "type": "string", "pattern": "^spiffe://" }, "minItems": 2, "maxItems": 5 },
+            "threshold": { "type": "integer", "minimum": 1, "maximum": 5 }
+          }
+        },
+        "yggdrasil": {
+          "type": "object",
+          "required": ["endpoint", "audit_batch_size", "audit_flush_interval_sec"],
+          "properties": {
+            "endpoint": { "type": "string", "format": "uri" },
+            "audit_batch_size": { "type": "integer", "minimum": 1, "maximum": 10000 },
+            "audit_flush_interval_sec": { "type": "integer", "minimum": 1, "maximum": 300 }
+          }
+        }
+      }
+    },
+    "packConfig": {
+      "type": "object",
+      "required": ["agent", "watcher", "messenger", "consensus_client", "policy_engine", "identity", "supervisor", "updates"],
+      "properties": {
+        "agent": {
+          "type": "object",
+          "required": ["segment", "tags"],
+          "properties": {
+            "id": { "type": "string" },
+            "segment": { "type": "string" },
+            "tags": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "watcher": {
+          "type": "object",
+          "required": ["windows", "linux", "containers", "network", "output"],
+          "properties": {
+            "windows": { "type": "object" },
+            "linux": { "type": "object" },
+            "containers": { "type": "object" },
+            "network": { "type": "object" },
+            "output": {
+              "type": "object",
+              "required": ["fenrir_endpoint", "batch_size", "flush_interval_ms", "backpressure"],
+              "properties": {
+                "fenrir_endpoint": { "type": "string", "format": "uri" },
+                "batch_size": { "type": "integer", "minimum": 1, "maximum": 10000 },
+                "flush_interval_ms": { "type": "integer", "minimum": 10, "maximum": 5000 },
+                "backpressure": {
+                  "type": "object",
+                  "required": ["max_queue_mb", "drop_policy"],
+                  "properties": {
+                    "max_queue_mb": { "type": "integer", "minimum": 64, "maximum": 2048 },
+                    "drop_policy": { "type": "string", "enum": ["oldest", "newest", "random"] }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "messenger": {
+          "type": "object",
+          "required": ["listen", "peer_discovery", "nat_traversal", "message_queues"],
+          "properties": {
+            "listen": { "type": "array", "items": { "type": "string", "format": "uri" }, "minItems": 1 },
+            "peer_discovery": {
+              "type": "object",
+              "required": ["bootstrap_nodes"],
+              "properties": {
+                "bootstrap_nodes": { "type": "array", "items": { "type": "string", "pattern": "^spiffe://" } },
+                "dns_sd": { "type": "string" },
+                "kubernetes": { "type": "object" }
+              }
+            },
+            "nat_traversal": {
+              "type": "object",
+              "required": ["stun_servers"],
+              "properties": {
+                "stun_servers": { "type": "array", "items": { "type": "string" } },
+                "turn_servers": { "type": "array", "items": { "type": "string" } }
+              }
+            },
+            "message_queues": { "type": "object" }
+          }
+        },
+        "consensus_client": {
+          "type": "object",
+          "required": ["garmr_endpoints", "vote_timeout_sec", "local_evaluation", "trust_weight"],
+          "properties": {
+            "garmr_endpoints": { "type": "array", "items": { "type": "string", "format": "uri" }, "minItems": 1 },
+            "vote_timeout_sec": { "type": "integer", "minimum": 1, "maximum": 60 },
+            "local_evaluation": {
+              "type": "object",
+              "required": ["use_cached_observations", "cache_ttl_sec", "min_observations_for_vote"],
+              "properties": {
+                "use_cached_observations": { "type": "boolean" },
+                "cache_ttl_sec": { "type": "integer", "minimum": 60, "maximum": 3600 },
+                "min_observations_for_vote": { "type": "integer", "minimum": 0, "maximum": 100 }
+              }
+            },
+            "trust_weight": {
+              "type": "object",
+              "required": ["base", "probation_multiplier"],
+              "properties": {
+                "base": { "type": "number", "minimum": 0.0, "maximum": 1.0 },
+                "probation_multiplier": { "type": "number", "minimum": 0.0, "maximum": 1.0 }
+              }
+            }
+          }
+        },
+        "policy_engine": {
+          "type": "object",
+          "required": ["opa_bundle_path", "fallback_policies"],
+          "properties": {
+            "opa_bundle_path": { "type": "string" },
+            "orthrus_endpoint": { "type": "string", "format": "uri" },
+            "fallback_policies": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "identity": {
+          "type": "object",
+          "required": ["spire_socket", "svid_ttl_sec", "renew_before_sec", "jwt_audiences", "signing_key", "trust_domain"],
+          "properties": {
+            "spire_socket": { "type": "string" },
+            "svid_ttl_sec": { "type": "integer", "minimum": 300, "maximum": 86400 },
+            "renew_before_sec": { "type": "integer", "minimum": 60, "maximum": 43200 },
+            "jwt_audiences": { "type": "array", "items": { "type": "string" } },
+            "signing_key": { "type": "string", "enum": ["ed25519"] },
+            "trust_domain": { "type": "string" }
+          }
+        },
+        "supervisor": {
+          "type": "object",
+          "required": ["health_checks", "metrics", "logging"],
+          "properties": {
+            "health_checks": { "type": "array", "items": { "type": "object" } },
+            "metrics": {
+              "type": "object",
+              "required": ["prometheus_port", "path"],
+              "properties": {
+                "prometheus_port": { "type": "integer", "minimum": 1024, "maximum": 65535 },
+                "path": { "type": "string" }
+              }
+            },
+            "logging": {
+              "type": "object",
+              "required": ["level", "format", "output", "structured_fields"],
+              "properties": {
+                "level": { "type": "string", "enum": ["trace", "debug", "info", "warn", "error"] },
+                "format": { "type": "string", "enum": ["json", "text"] },
+                "output": { "type": "string", "enum": ["stdout", "stderr", "file"] },
+                "structured_fields": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "updates": {
+          "type": "object",
+          "required": ["channel", "check_interval_hours", "auto_apply", "verify_signatures"],
+          "properties": {
+            "channel": { "type": "string", "enum": ["stable", "beta", "alpha"] },
+            "check_interval_hours": { "type": "integer", "minimum": 1, "maximum": 168 },
+            "auto_apply": { "type": "boolean" },
+            "verify_signatures": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "yggdrasilConfig": {
+      "type": "object",
+      "required": ["database", "storage_tiers", "graph", "api", "auth", "jobs", "backup"],
+      "properties": {
+        "database": {
+          "type": "object",
+          "required": ["primary", "replicas", "pool_size", "max_overflow", "pool_timeout"],
+          "properties": {
+            "primary": { "type": "string", "format": "uri" },
+            "replicas": { "type": "array", "items": { "type": "string", "format": "uri" } },
+            "pool_size": { "type": "integer", "minimum": 10, "maximum": 500 },
+            "max_overflow": { "type": "integer", "minimum": 0, "maximum": 100 },
+            "pool_timeout": { "type": "integer", "minimum": 5, "maximum": 120 }
+          }
+        },
+        "storage_tiers": {
+          "type": "object",
+          "required": ["hot", "warm", "cold"],
+          "properties": {
+            "hot": {
+              "type": "object",
+              "required": ["retention_days", "tablespace"],
+              "properties": {
+                "retention_days": { "type": "integer", "minimum": 1, "maximum": 90 },
+                "tablespace": { "type": "string" }
+              }
+            },
+            "warm": {
+              "type": "object",
+              "required": ["retention_days", "tablespace"],
+              "properties": {
+                "retention_days": { "type": "integer", "minimum": 30, "maximum": 1095 },
+                "tablespace": { "type": "string" }
+              }
+            },
+            "cold": {
+              "type": "object",
+              "required": ["retention_days", "bucket", "format", "compression"],
+              "properties": {
+                "retention_days": { "type": "integer", "minimum": 365, "maximum": 10000 },
+                "bucket": { "type": "string", "format": "uri" },
+                "format": { "type": "string", "enum": ["parquet", "orc", "avro"] },
+                "compression": { "type": "string", "enum": ["zstd", "snappy", "gzip", "lz4"] }
+              }
+            }
+          }
+        },
+        "graph": {
+          "type": "object",
+          "required": ["age_namespace", "cypher_timeout_ms", "max_path_depth", "similarity_vector_dim"],
+          "properties": {
+            "age_namespace": { "type": "string" },
+            "cypher_timeout_ms": { "type": "integer", "minimum": 1000, "maximum": 300000 },
+            "max_path_depth": { "type": "integer", "minimum": 3, "maximum": 20 },
+            "similarity_vector_dim": { "type": "integer", "minimum": 64, "maximum": 1024 }
+          }
+        },
+        "api": {
+          "type": "object",
+          "required": ["grpc", "graphql", "rest"],
+          "properties": {
+            "grpc": {
+              "type": "object",
+              "required": ["listen", "max_message_size_mb", "keepalive_ms"],
+              "properties": {
+                "listen": { "type": "string", "format": "uri" },
+                "max_message_size_mb": { "type": "integer", "minimum": 1, "maximum": 256 },
+                "keepalive_ms": { "type": "integer", "minimum": 1000, "maximum": 60000 }
+              }
+            },
+            "graphql": {
+              "type": "object",
+              "required": ["listen", "playground", "complexity_limit"],
+              "properties": {
+                "listen": { "type": "string", "format": "uri" },
+                "playground": { "type": "boolean" },
+                "complexity_limit": { "type": "integer", "minimum": 100, "maximum": 10000 }
+              }
+            },
+            "rest": {
+              "type": "object",
+              "required": ["listen", "openapi"],
+              "properties": {
+                "listen": { "type": "string", "format": "uri" },
+                "openapi": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "auth": {
+          "type": "object",
+          "required": ["spiffe_trust_domain", "allowed_audiences"],
+          "properties": {
+            "spiffe_trust_domain": { "type": "string" },
+            "allowed_audiences": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "jobs": {
+          "type": "object",
+          "required": ["scheduler", "temporal_namespace", "baseline_window_days", "trust_recompute_interval_min", "drift_threshold"],
+          "properties": {
+            "scheduler": { "type": "string", "enum": ["temporal", "airflow"] },
+            "temporal_namespace": { "type": "string" },
+            "baseline_window_days": { "type": "integer", "minimum": 7, "maximum": 90 },
+            "trust_recompute_interval_min": { "type": "integer", "minimum": 5, "maximum": 1440 },
+            "drift_threshold": { "type": "number", "minimum": 0.01, "maximum": 1.0 }
+          }
+        },
+        "backup": {
+          "type": "object",
+          "required": ["schedule", "retention", "destination", "encryption", "verify_restore"],
+          "properties": {
+            "schedule": { "type": "string" },
+            "retention": { "type": "integer", "minimum": 1, "maximum": 365 },
+            "destination": { "type": "string", "format": "uri" },
+            "encryption": { "type": "string", "enum": ["AES-256-GCM", "ChaCha20-Poly1305"] },
+            "verify_restore": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "moduleConfig": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" }
+      }
+    },
+    "huginConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "stix_taxii_endpoints": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "mitre_attack_version": { "type": "string", "default": "15.1" },
+        "enrichment_sources": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "muninConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "retention_years": { "type": "integer", "minimum": 1, "maximum": 20 },
+        "drift_detection": { "type": "boolean", "default": true }
+      }
+    },
+    "skollConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "hunt_schedule": { "type": "string" },
+        "hypothesis_templates": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "hatiConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "gnn_model": { "type": "string" },
+        "simulation_runs": { "type": "integer", "minimum": 100, "maximum": 100000 }
+      }
+    },
+    "heimdallConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "netflow_collectors": { "type": "array", "items": { "type": "string", "format": "uri" } },
+        "anomaly_baseline_days": { "type": "integer", "minimum": 7, "maximum": 90 }
+      }
+    },
+    "sleipnirConfig": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "fabric_type": { "type": "string", "enum": ["quic", "grpc", "nats", "redis"] },
+        "priority_lanes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

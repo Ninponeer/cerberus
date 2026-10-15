@@ -1,0 +1,20 @@
+[package]
+name = "cerberus-shepherd-python"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+description = "Cerberus Shepherd Python Bindings (PyO3)"
+
+[lib]
+name = "cerberus_shepherd"
+crate-type = ["cdylib"]
+
+[dependencies]
+cerberus-shepherd-lib = { path = "../lib", features = ["pyo3"] }
+pyo3 = { workspace = true }
+
+[features]
+default = []
+abi3 = ["pyo3/abi3"]

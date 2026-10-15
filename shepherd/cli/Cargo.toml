@@ -1,0 +1,37 @@
+[package]
+name = "cerberus-shepherd-cli"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+description = "Cerberus Shepherd CLI - The Operator's Harness"
+categories = { workspace = true }
+keywords = { workspace = true }
+
+[[bin]]
+name = "shepherd"
+path = "src/main.rs"
+
+[dependencies]
+cerberus-shepherd-lib = { path = "../lib" }
+cerberus-core = { workspace = true }
+tokio = { workspace = true, features = ["full", "tracing"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+clap = { workspace = true }
+console = { workspace = true }
+indicatif = { workspace = true }
+dialoguer = { workspace = true }
+miette = { workspace = true }
+reqwest = { workspace = true }
+url = { workspace = true }
+config = { workspace = true }
+figment = { workspace = true }
+
+[dev-dependencies]
+mockall = { workspace = true }

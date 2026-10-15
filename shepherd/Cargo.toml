@@ -1,0 +1,78 @@
+[workspace]
+resolver = "2"
+members = [
+    "cli",
+    "lib",
+]
+exclude = ["python"]
+
+[workspace.package]
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+categories = ["command-line-utilities", "network-programming", "security"]
+keywords = ["cerberus", "shepherd", "c2c", "management-plane"]
+
+[workspace.dependencies]
+# Core
+cerberus-core = { path = "../src/core", features = ["prost"] }
+cerberus-proto = { path = "../src/proto", optional = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+bytes = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+rustls = { workspace = true }
+ed25519-dalek = { workspace = true }
+sqlx = { workspace = true }
+redis = { workspace = true }
+config = { workspace = true }
+figment = { workspace = true }
+metrics = { workspace = true }
+prometheus = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry-otlp = { workspace = true }
+opentelemetry-sdk = { workspace = true }
+clap = { workspace = true }
+
+# Shepherd specific
+spiffe = "0.1"
+spire-api = "0.1"
+reqwest = { version = "0.12", features = ["json", "rustls-tls", "stream"] }
+url = "2.5"
+miette = "7.0"
+console = "0.15"
+indicatif = "0.17"
+dialoguer = "0.11"
+zeroize = { workspace = true }
+secrecy = { workspace = true }
+
+# Python bindings (PyO3)
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py38", "generate-abi3"] }
+maturin = "1.7"
+
+[profile.dev]
+opt-level = 0
+debug = true
+overflow-checks = true
+
+[profile.release]
+opt-level = 3
+debug = false
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+
+[profile.test]
+opt-level = 2
+debug = true
+overflow-checks = true

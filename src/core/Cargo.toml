@@ -1,0 +1,43 @@
+[package]
+name = "cerberus-core"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+categories = { workspace = true }
+keywords = ["cerberus", "core", "shared", "types", "proto"]
+description = "Cerberus Core: Shared types, protobuf definitions, error handling, utilities"
+
+[dependencies]
+cerberus-proto = { path = "../proto", optional = true }
+tonic = { workspace = true }
+num_cpus = "1.16"
+tokio = { workspace = true, features = ["full", "tracing"] }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+bytes = { workspace = true }
+prost = { workspace = true, optional = true }
+prost-types = { workspace = true, optional = true }
+ed25519-dalek = { workspace = true }
+x25519-dalek = { workspace = true }
+rand = { workspace = true }
+zeroize = { workspace = true }
+secrecy = { workspace = true }
+config = { workspace = true }
+figment = { workspace = true }
+metrics = { workspace = true }
+clap = { workspace = true }
+
+[dev-dependencies]
+proptest = { workspace = true }
+
+[features]
+default = []
+prost = ["dep:prost", "dep:prost-types"]
+proto = ["cerberus-proto", "prost"]

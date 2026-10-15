@@ -1,0 +1,63 @@
+[package]
+name = "cerberus-fenrir"
+version = { workspace = true }
+edition = "2024"
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+categories = { workspace = true }
+keywords = ["fenrir", "threat-detection", "anomaly-detection"]
+description = "Fenrir - The Hunter: Threat discovery, behavioral analysis, anomaly detection"
+
+[dependencies]
+cerberus-core = { path = "../core", features = ["prost"] }
+cerberus-bitnet-sys = { path = "../bitnet-sys" }
+tokio = { workspace = true, features = ["full", "tracing"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+bytes = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true, optional = true }
+prost-types = { workspace = true, optional = true }
+rustls = { workspace = true }
+ed25519-dalek = { workspace = true }
+sqlx = { workspace = true }
+redis = { workspace = true }
+rocksdb = { workspace = true }
+lmdb = { workspace = true }
+config = { workspace = true }
+figment = { workspace = true }
+metrics = { workspace = true }
+prometheus = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry-otlp = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+clap = { workspace = true }
+ort = "2.0.0-rc.14"
+tract = { version = "0.23", features = ["default"] }
+llama-cpp-2 = { version = "0.1" }
+candle = { package = "candle-core", version = "0.8" }
+candle-nn = { version = "0.8" }
+candle-transformers = { version = "0.8" }
+num_cpus = "1.16"
+
+[dev-dependencies]
+testcontainers = { workspace = true }
+proptest = { workspace = true }
+mockall = { workspace = true }
+
+[[bin]]
+name = "fenrir"
+path = "src/main.rs"
+
+[features]
+default = []
+bitnet = []
+cuda = ["candle/cuda", "candle-nn/cuda"]
+metal = ["candle/metal", "candle-nn/metal"]

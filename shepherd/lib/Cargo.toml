@@ -1,0 +1,51 @@
+[package]
+name = "cerberus-shepherd-lib"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+description = "Cerberus Shepherd Core Library - Deployment, Override, Trust, Query"
+categories = { workspace = true }
+keywords = { workspace = true }
+
+[lib]
+name = "cerberus_shepherd_lib"
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+cerberus-core = { workspace = true, features = ["prost"] }
+tokio = { workspace = true, features = ["full", "tracing"] }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true }
+rustls = { workspace = true }
+ed25519-dalek = { workspace = true }
+sqlx = { workspace = true }
+redis = { workspace = true }
+config = { workspace = true }
+figment = { workspace = true }
+reqwest = { workspace = true }
+url = { workspace = true }
+miette = { workspace = true }
+zeroize = { workspace = true }
+secrecy = { workspace = true }
+
+# Python bindings (optional feature)
+pyo3 = { workspace = true, optional = true }
+
+[features]
+default = []
+pyo3 = ["pyo3"]
+proto = ["cerberus-core/prost"]
+
+[dev-dependencies]
+testcontainers = { workspace = true }
+mockall = { workspace = true }
+proptest = { workspace = true }

@@ -1,0 +1,613 @@
+syntax = "proto3";
+
+package cerberus.v1;
+
+// option rust_prefix = "cerberus_proto";
+option go_package = "github.com/cerberus/gen/go/v1;cerberusv1";
+// option python_package = "cerberus.proto.v1";
+option java_package = "com.cerberus.proto.v1";
+option java_multiple_files = true;
+
+// ============================================================================
+// Core Types
+// ============================================================================
+
+message EndpointIdentity {
+  string endpoint_id = 1;
+  string hostname = 2;
+  string os = 3;
+  string arch = 4;
+  string agent_version = 5;
+  uint64 enrolled_at = 6;
+  map<string, string> labels = 7;
+  Capabilities capabilities = 8;
+  IdentityProof proof = 9;
+}
+
+message Capabilities {
+  ComputeTier tier = 1;
+  double total_ram_gb = 2;
+  double available_ram_gb = 3;
+  uint32 cpu_cores = 4;
+  GpuInfo gpu = 5;
+  repeated string instruction_sets = 6;
+  bool has_kernel_callbacks = 7;
+  bool has_network_tap = 8;
+}
+
+enum ComputeTier {
+  TIER_UNSPECIFIED = 0;
+  TIER_T0 = 1;  // < 4GB RAM, no GPU, CPU only
+  TIER_T1 = 2;  // 4-8GB RAM, no GPU or integrated
+  TIER_T2 = 3;  // 8-16GB RAM, discrete GPU
+  TIER_T3 = 4;  // 16GB+ RAM, high-end GPU
+}
+
+message GpuInfo {
+  string vendor = 1;      // nvidia, amd, intel, apple
+  string model = 2;
+  double vram_gb = 3;
+  bool cuda = 4;
+  bool rocm = 5;
+  bool metal = 6;
+}
+
+message IdentityProof {
+  string spiFFE_id = 1;
+  bytes certificate_pem = 2;
+  bytes signature = 3;
+  uint64 signed_at = 4;
+}
+
+// ============================================================================
+// Telemetry & Observations (Fenrir -> Garmr)
+// ============================================================================
+
+message Observation {
+  string observation_id = 1;
+  string endpoint_id = 2;
+  uint64 timestamp_ns = 3;
+  DetectionDomain domain = 4;
+  ObservationPayload payload = 5;
+  InferenceResult inference = 6;
+  map<string, string> context = 7;
+}
+
+enum DetectionDomain {
+  DOMAIN_UNSPECIFIED = 0;
+  DOMAIN_DNS_ANOMALY = 1;
+  DOMAIN_BINARY_REPUTATION = 2;
+  DOMAIN_BEACONING = 3;
+  DOMAIN_INJECTION = 4;
+  DOMAIN_CREDENTIAL_ABUSE = 5;
+  DOMAIN_LATERAL_MOVEMENT = 6;
+  DOMAIN_CUSTOM = 99;
+}
+
+message ObservationPayload {
+  oneof payload {
+    DnsObservation dns = 1;
+    BinaryObservation binary = 2;
+    NetworkObservation network = 3;
+    ProcessObservation process = 4;
+    AuthObservation auth = 5;
+    CustomObservation custom = 99;
+  }
+}
+
+message DnsObservation {
+  string query = 1;
+  string response = 2;
+  int32 rcode = 3;
+  string query_type = 4;
+  uint64 latency_ns = 5;
+}
+
+message BinaryObservation {
+  string file_path = 1;
+  string sha256 = 2;
+  string sha1 = 3;
+  string md5 = 4;
+  uint64 size = 5;
+  string signer = 6;
+  bool is_signed = 7;
+  map<string, string> pe_info = 8;
+}
+
+message NetworkObservation {
+  string src_ip = 1;
+  string dst_ip = 2;
+  uint32 dst_port = 3;
+  string protocol = 4;
+  uint64 bytes = 5;
+  uint64 packets = 6;
+  uint64 duration_ns = 7;
+  string process = 8;
+  string user = 9;
+}
+
+message ProcessObservation {
+  uint32 pid = 1;
+  uint32 ppid = 2;
+  string image_path = 3;
+  string command_line = 4;
+  string user = 5;
+  string operation = 6;  // e.g., "CreateRemoteThread", "WriteProcessMemory"
+  uint64 target_pid = 7;
+  map<string, string> details = 8;
+}
+
+message AuthObservation {
+  string user = 1;
+  string source_ip = 2;
+  string target_host = 3;
+  AuthType auth_type = 4;
+  AuthResult result = 5;
+  uint32 error_code = 6;
+  uint32 logon_type = 7;
+}
+
+enum AuthType {
+  AUTH_UNSPECIFIED = 0;
+  AUTH_KERBEROS = 1;
+  AUTH_NTLM = 2;
+  AUTH_LDAP = 3;
+  AUTH_RDP = 4;
+  AUTH_SSH = 5;
+  AUTH_VPN = 6;
+  AUTH_WEB = 7;
+  AUTH_OTHER = 99;
+}
+
+enum AuthResult {
+  AUTH_RESULT_UNSPECIFIED = 0;
+  AUTH_SUCCESS = 1;
+  AUTH_FAILURE = 2;
+  AUTH_LOCKOUT = 3;
+}
+
+message CustomObservation {
+  string type = 1;
+  bytes data = 2;
+}
+
+message InferenceResult {
+  string model_name = 1;
+  BackendType backend = 2;
+  float confidence = 3;
+  float latency_ms = 4;
+  map<string, float> features = 5;
+  bytes raw_output = 6;
+}
+
+enum BackendType {
+  BACKEND_UNSPECIFIED = 0;
+  BACKEND_ONNX = 1;
+  BACKEND_BITNET = 2;
+  BACKEND_GGUF = 3;
+  BACKEND_CANDLE = 4;
+  BACKEND_STATISTICAL = 5;
+}
+
+// ============================================================================
+// Verdicts (Garmr -> Orthrus/Pack)
+// ============================================================================
+
+message Verdict {
+  string verdict_id = 1;
+  string correlation_id = 2;
+  uint64 timestamp_ns = 3;
+  VerdictLevel level = 4;
+  float confidence = 5;
+  repeated string observation_ids = 6;
+  VerdictAction action = 7;
+  map<string, string> evidence = 8;
+  string explanation = 9;
+}
+
+enum VerdictLevel {
+  LEVEL_UNSPECIFIED = 0;
+  LEVEL_INFO = 1;
+  LEVEL_LOW = 2;
+  LEVEL_MEDIUM = 3;
+  LEVEL_HIGH = 4;
+  LEVEL_CRITICAL = 5;
+}
+
+message VerdictAction {
+  oneof action {
+    ContainmentAction containment = 1;
+    DecoyAction decoy = 2;
+    RedirectionAction redirection = 3;
+    CredentialAction credential = 4;
+    NotificationAction notification = 5;
+    CustomAction custom = 99;
+  }
+  uint64 expires_at = 100;
+  bool requires_confirmation = 101;
+}
+
+message ContainmentAction {
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    NETWORK_ISOLATE = 1;
+    NETWORK_QUARANTINE = 2;
+    ENDPOINT_QUARANTINE = 3;
+    PROCESS_KILL = 4;
+    PROCESS_SUSPEND = 5;
+  }
+  Type type = 1;
+  string target_endpoint = 2;
+  string target_process = 3;
+  string network_segment = 4;
+  map<string, string> parameters = 5;
+}
+
+message DecoyAction {
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    DEPLOY_HONEYPOT = 1;
+    DEPLOY_HONEYTOKEN = 2;
+    DEPLOY_FAKE_CREDENTIAL = 3;
+    DEPLOY_FAKE_SHARE = 4;
+  }
+  Type type = 1;
+  string target_segment = 2;
+  map<string, string> configuration = 3;
+}
+
+message RedirectionAction {
+  string target_endpoint = 1;
+  string original_dst = 2;
+  string redirect_dst = 3;
+  uint32 redirect_port = 4;
+}
+
+message CredentialAction {
+  enum Type {
+    TYPE_UNSPECIFIED = 0;
+    SUSPEND = 1;
+    RESET = 2;
+    REVOKE = 3;
+    REQUIRE_MFA = 4;
+  }
+  Type type = 1;
+  string principal = 2;
+  string reason = 3;
+}
+
+message NotificationAction {
+  enum Severity {
+    SEVERITY_UNSPECIFIED = 0;
+    SEVERITY_INFO = 1;
+    SEVERITY_WARNING = 2;
+    SEVERITY_ALERT = 3;
+  }
+  Severity severity = 1;
+  string title = 2;
+  string message = 3;
+  map<string, string> details = 4;
+}
+
+message CustomAction {
+  string type = 1;
+  bytes payload = 2;
+}
+
+// ============================================================================
+// Pack Consensus (Garmr <-> Pack)
+// ============================================================================
+
+message ConsensusRequest {
+  string request_id = 1;
+  string verdict_id = 2;
+  Verdict proposed_verdict = 3;
+  repeated string participant_ids = 4;
+  uint32 quorum_threshold = 5;
+  uint64 deadline_ns = 6;
+}
+
+message ConsensusVote {
+  string request_id = 1;
+  string participant_id = 2;
+  VoteDecision decision = 3;
+  float confidence = 4;
+  string reasoning = 5;
+  uint64 timestamp_ns = 6;
+}
+
+enum VoteDecision {
+  VOTE_UNSPECIFIED = 0;
+  VOTE_AGREE = 1;
+  VOTE_DISAGREE = 2;
+  VOTE_ABSTAIN = 3;
+}
+
+message ConsensusResult {
+  string request_id = 1;
+  ConsensusOutcome outcome = 2;
+  repeated ConsensusVote votes = 3;
+  uint64 decided_at = 4;
+}
+
+enum ConsensusOutcome {
+  OUTCOME_UNSPECIFIED = 0;
+  OUTCOME_APPROVED = 1;
+  OUTCOME_REJECTED = 2;
+  OUTCOME_TIMEOUT = 3;
+  OUTCOME_INSUFFICIENT_QUORUM = 4;
+}
+
+// ============================================================================
+// Yggdrasil Knowledge Graph
+// ============================================================================
+
+message GraphNode {
+  string node_id = 1;
+  NodeType type = 2;
+  map<string, string> properties = 3;
+  uint64 created_at = 4;
+  uint64 updated_at = 5;
+  float trust_score = 6;
+}
+
+enum NodeType {
+  NODE_UNSPECIFIED = 0;
+  NODE_ENDPOINT = 1;
+  NODE_USER = 2;
+  NODE_PROCESS = 3;
+  NODE_FILE = 4;
+  NODE_NETWORK = 5;
+  NODE_OBSERVATION = 6;
+  NODE_VERDICT = 7;
+  NODE_ATTACK_PATTERN = 8;
+  NODE_THREAT_ACTOR = 9;
+  NODE_MITRE_TECHNIQUE = 10;
+}
+
+message GraphEdge {
+  string edge_id = 1;
+  string source_id = 2;
+  string target_id = 3;
+  EdgeType type = 4;
+  float weight = 5;
+  map<string, string> properties = 6;
+  uint64 created_at = 7;
+  uint64 observed_at = 8;
+  uint32 observation_count = 9;
+}
+
+enum EdgeType {
+  EDGE_UNSPECIFIED = 0;
+  EDGE_OBSERVED_ON = 1;
+  EDGE_COMMUNICATED_WITH = 2;
+  EDGE_SPAWNED = 3;
+  EDGE_INJECTED_INTO = 4;
+  EDGE_ACCESSED = 5;
+  EDGE_AUTHENTICATED_AS = 6;
+  EDGE_PRECEDED = 7;           // temporal
+  EDGE_SIMILAR_TO = 8;         // behavioral similarity
+  EDGE_INDICATES = 9;          // observation -> technique
+  EDGE_ATTRIBUTED_TO = 10;     // technique -> threat actor
+}
+
+message GraphQuery {
+  string query_id = 1;
+  QueryType type = 2;
+  string cypher = 3;           // Cypher-like query
+  map<string, string> parameters = 4;
+  uint32 limit = 5;
+  uint64 deadline_ns = 6;
+}
+
+enum QueryType {
+  QUERY_UNSPECIFIED = 0;
+  QUERY_CYPHER = 1;
+  QUERY_NEIGHBORS = 2;
+  QUERY_PATH = 3;
+  QUERY_PATTERN = 4;
+  QUERY_TIMELINE = 5;
+}
+
+message GraphQueryResult {
+  string query_id = 1;
+  repeated GraphNode nodes = 2;
+  repeated GraphEdge edges = 3;
+  uint64 execution_time_ns = 4;
+  bool partial = 5;
+}
+
+// ============================================================================
+// Model Management
+// ============================================================================
+
+message ModelSpec {
+  string model_id = 1;
+  string name = 2;
+  BackendType backend = 3;
+  string version = 4;
+  string sha256 = 5;
+  uint64 size_bytes = 6;
+  ComputeTier min_tier = 7;
+  ComputeTier max_tier = 8;
+  DetectionDomain domain = 9;
+  uint32 sequence_length = 10;
+  map<string, string> parameters = 11;
+  uint64 published_at = 12;
+  bytes signature = 13;
+}
+
+message ModelManifest {
+  string manifest_id = 1;
+  uint64 generated_at = 2;
+  repeated ModelSpec models = 3;
+  bytes signature = 4;
+}
+
+// ============================================================================
+// Service Definitions
+// ============================================================================
+
+service FenrirService {
+  rpc StreamObservations(stream Observation) returns (StreamAck);
+  rpc GetModelSpec(ModelSpecRequest) returns (ModelSpec);
+  rpc ReportInferenceMetrics(InferenceMetrics) returns (StreamAck);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+service GarmrService {
+  rpc SubmitObservation(Observation) returns (Verdict);
+  rpc RequestConsensus(ConsensusRequest) returns (ConsensusResult);
+  rpc StreamVerdicts(VerdictFilter) returns (stream Verdict);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+service OrthrusService {
+  rpc ExecuteAction(VerdictAction) returns (ActionResult);
+  rpc GetActionStatus(ActionStatusRequest) returns (ActionStatus);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+service PackService {
+  rpc JoinPack(JoinRequest) returns (JoinResponse);
+  rpc LeavePack(LeaveRequest) returns (StreamAck);
+  rpc Vote(ConsensusVote) returns (StreamAck);
+  rpc Gossip(GossipMessage) returns (GossipMessage);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+service YggdrasilService {
+  rpc UpsertNode(GraphNode) returns (StreamAck);
+  rpc UpsertEdge(GraphEdge) returns (StreamAck);
+  rpc Query(GraphQuery) returns (GraphQueryResult);
+  rpc StreamChanges(ChangeFilter) returns (stream GraphChange);
+  rpc GetModelManifest(ManifestRequest) returns (ModelManifest);
+  rpc HealthCheck(HealthRequest) returns (HealthResponse);
+}
+
+message GraphChange {
+  enum ChangeType {
+    CHANGE_UNSPECIFIED = 0;
+    NODE_CREATED = 1;
+    NODE_UPDATED = 2;
+    NODE_DELETED = 3;
+    EDGE_CREATED = 4;
+    EDGE_UPDATED = 5;
+    EDGE_DELETED = 6;
+  }
+  ChangeType type = 1;
+  GraphNode node = 2;
+  GraphEdge edge = 3;
+  uint64 timestamp_ns = 4;
+}
+
+message ChangeFilter {
+  repeated NodeType node_types = 1;
+  repeated EdgeType edge_types = 2;
+  uint64 since_ns = 3;
+}
+
+message ManifestRequest {
+  ComputeTier tier = 1;
+  repeated DetectionDomain domains = 2;
+}
+
+// Common messages
+message StreamAck {
+  bool success = 1;
+  string message = 2;
+}
+
+message ModelSpecRequest {
+  string model_id = 1;
+}
+
+message InferenceMetrics {
+  string endpoint_id = 1;
+  string model_name = 2;
+  BackendType backend = 3;
+  uint64 inference_count = 4;
+  float avg_latency_ms = 5;
+  float p99_latency_ms = 6;
+  uint64 errors = 7;
+  uint64 window_start_ns = 8;
+  uint64 window_end_ns = 9;
+}
+
+message HealthRequest {
+  string service = 1;
+}
+
+message HealthResponse {
+  bool healthy = 1;
+  string version = 2;
+  map<string, string> details = 3;
+}
+
+message VerdictFilter {
+  repeated VerdictLevel levels = 1;
+  repeated string endpoint_ids = 2;
+  uint64 since_ns = 3;
+}
+
+message ActionResult {
+  bool success = 1;
+  string action_id = 2;
+  string message = 3;
+  map<string, string> details = 4;
+}
+
+message ActionStatusRequest {
+  string action_id = 1;
+}
+
+message ActionStatus {
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_PENDING = 1;
+    STATUS_EXECUTING = 2;
+    STATUS_COMPLETED = 3;
+    STATUS_FAILED = 4;
+    STATUS_ROLLED_BACK = 5;
+  }
+  Status status = 1;
+  string action_id = 2;
+  uint64 started_at = 3;
+  uint64 completed_at = 4;
+  string error = 5;
+  map<string, string> details = 6;
+}
+
+message JoinRequest {
+  EndpointIdentity identity = 1;
+  repeated string known_peers = 2;
+}
+
+message JoinResponse {
+  bool accepted = 1;
+  string pack_id = 2;
+  repeated EndpointIdentity peers = 3;
+  string welcome_message = 4;
+}
+
+message LeaveRequest {
+  string endpoint_id = 1;
+  string reason = 2;
+}
+
+message GossipMessage {
+  string message_id = 1;
+  string sender_id = 2;
+  uint64 timestamp_ns = 3;
+  GossipType type = 4;
+  bytes payload = 5;
+  uint32 ttl = 6;
+}
+
+enum GossipType {
+  GOSSIP_UNSPECIFIED = 0;
+  GOSSIP_VERDICT = 1;
+  GOSSIP_MODEL_UPDATE = 2;
+  GOSSIP_TOPOLOGY = 3;
+  GOSSIP_HEARTBEAT = 4;
+}

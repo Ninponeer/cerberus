@@ -1,0 +1,51 @@
+[package]
+name = "cerberus-orthrus"
+version = { workspace = true }
+edition = { workspace = true }
+license = { workspace = true }
+repository = { workspace = true }
+authors = { workspace = true }
+categories = { workspace = true }
+keywords = ["orthrus", "response", "containment", "recovery"]
+description = "Orthrus - The Shepherd: Response, containment, recovery, evidence preservation"
+
+[dependencies]
+cerberus-core = { path = "../core", features = ["prost"] }
+tokio = { workspace = true, features = ["full", "tracing"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+bytes = { workspace = true }
+tonic = { workspace = true }
+prost = { workspace = true, optional = true }
+prost-types = { workspace = true, optional = true }
+rustls = { workspace = true }
+ed25519-dalek = { workspace = true }
+sqlx = { workspace = true }
+redis = { workspace = true }
+config = { workspace = true }
+figment = { workspace = true }
+metrics = { workspace = true }
+prometheus = { workspace = true }
+opentelemetry = { workspace = true }
+opentelemetry-otlp = { workspace = true }
+opentelemetry_sdk = { workspace = true }
+clap = { workspace = true }
+opa = "0.6"
+
+[dev-dependencies]
+testcontainers = { workspace = true }
+proptest = { workspace = true }
+mockall = { workspace = true }
+
+[[bin]]
+name = "orthrus"
+path = "src/main.rs"
+
+[features]
+default = []

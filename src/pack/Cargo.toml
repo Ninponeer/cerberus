@@ -46,9 +46,6 @@ opentelemetry_sdk = { workspace = true }
 clap = { workspace = true }
 opa = "0.6"
 
-# Platform-specific
-#[cfg(target_os = "windows")]
-windows = { workspace = true }
 
 [dev-dependencies]
 testcontainers = { workspace = true }

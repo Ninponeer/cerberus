@@ -19,6 +19,7 @@ thiserror = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 uuid = { workspace = true }
+async-trait = "0.1"
 chrono = { workspace = true }
 bytes = { workspace = true }
 tonic = { workspace = true }
@@ -39,6 +40,7 @@ clap = { workspace = true }
 opa = "0.6"
 
 [dev-dependencies]
+rand = { workspace = true }
 testcontainers = { workspace = true }
 proptest = { workspace = true }
 mockall = { workspace = true }

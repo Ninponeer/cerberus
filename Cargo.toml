@@ -91,7 +91,7 @@ windows = { version = "0.59", features = [
 
 [profile.dev]
 opt-level = 0
-debug = true
+debug = 1
 overflow-checks = true
 
 [profile.release]
@@ -103,5 +103,12 @@ panic = "abort"
 
 [profile.test]
 opt-level = 2
-debug = true
+debug = 1
 overflow-checks = true
+
+# Suppress debug symbols on external dependencies to prevent disk bloat
+[profile.dev.package."*"]
+debug = false
+
+[profile.test.package."*"]
+debug = false

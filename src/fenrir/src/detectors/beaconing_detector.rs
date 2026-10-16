@@ -98,13 +98,16 @@ mod tests {
     #[test]
     fn test_irregular_traffic() {
         let mut detector = BeaconingDetector::new(1.0, 5);
-        let base = 1_000_000_000_000u64;
+        let mut current_time = 1_000_000_000_000u64;
+        let irregular_intervals_sec = [5, 120, 15, 300, 2, 85, 40, 210, 10, 95];
         
-        for i in 0..10 {
-            let _ = detector.observe("10.0.0.1", "10.0.0.100", 443, base + i * 60_000_000_000 + (i * 1000 * 1_000_000) as u64);
+        for interval in irregular_intervals_sec {
+            current_time += interval * 1_000_000_000;
+            let _ = detector.observe("10.0.0.1", "10.0.0.100", 443, current_time);
         }
         
-        let result = detector.observe("10.0.0.1", "10.0.0.100", 443, base + 10 * 60_000_000_000 + 10000 * 1_000_000);
+        current_time += 500 * 1_000_000_000;
+        let result = detector.observe("10.0.0.1", "10.0.0.100", 443, current_time);
         assert!(result.unwrap().is_none());
     }
 }

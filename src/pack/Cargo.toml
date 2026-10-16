@@ -27,6 +27,11 @@ prost-types = { workspace = true, optional = true }
 quinn = { workspace = true }
 rustls = { workspace = true }
 ed25519-dalek = { workspace = true }
+rcgen = { workspace = true }
+rand = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+time = { version = "0.3", default-features = false }
 sqlx = { workspace = true }
 redis = { workspace = true }
 rocksdb = { workspace = true }

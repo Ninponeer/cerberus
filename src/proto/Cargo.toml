@@ -12,6 +12,7 @@ description = "Cerberus protobuf definitions and generated Rust code"
 [build-dependencies]
 prost-build = "0.13"
 tonic-build = "0.12"
+protoc-bin-vendored = "3.0"
 
 [dependencies]
 prost = { workspace = true }

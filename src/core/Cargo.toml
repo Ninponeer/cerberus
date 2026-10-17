@@ -34,6 +34,9 @@ figment = { workspace = true }
 metrics = { workspace = true }
 clap = { workspace = true }
 
+[target.'cfg(windows)'.dependencies]
+windows = { workspace = true }
+
 [dev-dependencies]
 proptest = { workspace = true }
 

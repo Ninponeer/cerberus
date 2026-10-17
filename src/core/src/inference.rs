@@ -2,7 +2,7 @@
 //!
 //! Defines the abstraction layer for all inference backends (ONNX, BitNet, GGUF, Candle)
 
-pub use crate::error::Result;
+pub use crate::error::{CerberusError, Result};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::fmt;
@@ -97,7 +97,10 @@ impl EndpointCapabilities {
             use windows::Win32::System::SystemInformation::{GlobalMemoryStatusEx, MEMORYSTATUSEX};
             let mut mem_info = MEMORYSTATUSEX::default();
             mem_info.dwLength = std::mem::size_of::<MEMORYSTATUSEX>() as u32;
-            unsafe { GlobalMemoryStatusEx(&mut mem_info)?; }
+            unsafe {
+                GlobalMemoryStatusEx(&mut mem_info)
+                    .map_err(|e| CerberusError::Internal(format!("Failed to get memory status: {}", e)))?;
+            }
             return Ok(mem_info.ullTotalPhys as f32 / 1024.0 / 1024.0 / 1024.0);
         }
         #[cfg(target_os = "macos")]
@@ -107,6 +110,7 @@ impl EndpointCapabilities {
             let bytes: f32 = String::from_utf8_lossy(&output.stdout).trim().parse().unwrap_or(0.0);
             return Ok(bytes / 1024.0 / 1024.0 / 1024.0);
         }
+        #[allow(unreachable_code)]
         Ok(8.0) // Default fallback
     }
     

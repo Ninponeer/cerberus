@@ -39,7 +39,7 @@ prost = "0.13"
 prost-types = "0.13"
 hyper = { version = "1.3", features = ["full", "http2"] }
 quinn = "0.11"
-rustls = { version = "0.23", features = ["fips", "std"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
 rustls-pemfile = "1.0"
 rcgen = "0.12"
 
@@ -78,11 +78,11 @@ mockall = "0.12"
 clap = { version = "4.5", features = ["derive", "env", "help", "usage", "string", "wrap_help"] }
 
 # Platform-specific
-#[cfg(target_os = "windows")]
 windows = { version = "0.59", features = [
     "Win32_System_Threading",
     "Win32_System_Diagnostics_Etw",
     "Win32_System_Diagnostics_Debug",
+    "Win32_System_SystemInformation",
     "Win32_Security",
     "Win32_Foundation",
     "Win32_System_Kernel",

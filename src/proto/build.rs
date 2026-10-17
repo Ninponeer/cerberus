@@ -1,4 +1,5 @@
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    unsafe { std::env::set_var("PROTOC", protoc_bin_vendored::protoc_bin_path().unwrap()); }
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR")?;
     let proto_dir = std::path::Path::new(&manifest_dir);
     let proto_file = proto_dir.join("cerberus.proto");

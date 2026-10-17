@@ -264,6 +264,29 @@ Thresholds:
 
 ---
 
+### 2.6 Hati: The Shadow Hound (Offensive Arm)
+
+**Rune:** Nauthiz (ᚾ) - Need / Constraint; and Thurisaz (ᚦ) - The Reactive Thorn  
+**Role:** Automated adversary emulation, black-box penetration probing, cognitive credential auditing, and continuous verification of Fenrir's detection models.
+
+- **The Leashed Warhound:** Operates strictly under human-signed Ed25519 authorization tokens from Shepherd (`StrikeMandate`), bounded strictly to declared IP targets.
+- **Cognitive Attack Modeling:** Infers target-specific credentials and configuration vulnerabilities using Bayesian and contextual LLM reasoning rather than brute force.
+- **Purple Validation:** Probes internal assets to verify that Fenrir catches intrusions; detection gaps trigger automated weight tuning.
+- **Reference Spec:** [hati.md](file:///C:/bitbucket/cerberus/specs/hati.md)
+
+---
+
+### 2.7 Vidar: The Reclaimer (Purge & Subversion)
+
+**Rune:** Dagaz (ᛞ) - Dawn / Breakthrough; and Eihwaz (ᛇ) - Resilience  
+**Role:** Deep autonomous remediation, persistence scrubbing, immutable snapshot rollback, and honeypot / turncoat subversion.
+
+- **The Surgical Purge:** Eradicates malware process lineages, memory hooks, scheduled tasks, registry Run keys, systemd units, and re-flashes verified firmware over Bifröst/PXE.
+- **The Turncoat (Honey-Puppet):** Transmutes compromised endpoints into active sovereign sensor taps, sinkholing adversary C2 traffic into deception sandboxes and harvesting enemy tools and lateral movement intelligence.
+- **Reference Spec:** [vidar.md](file:///C:/bitbucket/cerberus/specs/vidar.md)
+
+---
+
 ## 3. Communication & Security
 
 ### 3.1 Transport Security
@@ -286,6 +309,10 @@ Thresholds:
 │   │     └── correlation/<instance-id>   │
 │   ├── orthrus/                          │
 │   │     └── executor/<instance-id>      │
+│   ├── hati/                             │
+│   │     └── striker/<instance-id>       │
+│   ├── vidar/                            │
+│   │     └── reclaimer/<instance-id>     │
 │   ├── pack/                             │
 │   │     └── agent/<node-id>             │
 │   ├── yggdrasil/                        │

@@ -8,6 +8,7 @@ pub mod beaconing_detector;
 pub mod injection_detector;
 pub mod credential_abuse;
 pub mod lateral_movement;
+pub mod network_recon;
 
 pub use dns_anomaly::DnsAnomalyDetector;
 pub use binary_reputation::BinaryReputationDetector;
@@ -15,3 +16,4 @@ pub use beaconing_detector::BeaconingDetector;
 pub use injection_detector::InjectionDetector;
 pub use credential_abuse::CredentialAbuseDetector;
 pub use lateral_movement::LateralMovementDetector;
+pub use network_recon::{HostScanResult, NetworkReconConfig, NetworkReconDetector, PortProbe};

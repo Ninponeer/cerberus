@@ -209,6 +209,7 @@ pub enum DetectionDomain {
     InjectionDetector,
     CredentialAbuse,
     LateralMovement,
+    NetworkRecon,
 }
 
 /// Model specification for loading

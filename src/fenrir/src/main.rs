@@ -1,4 +1,8 @@
 //! Fenrir daemon entry point
+//!
+//! Requires the "cli" feature.
+
+#![cfg(feature = "cli")]
 
 use anyhow::Result;
 use tracing::info;

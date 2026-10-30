@@ -10,8 +10,8 @@ keywords = ["fenrir", "threat-detection", "anomaly-detection"]
 description = "Fenrir - The Hunter: Threat discovery, behavioral analysis, anomaly detection"
 
 [dependencies]
-cerberus-core = { path = "../core", features = ["prost"] }
-cerberus-bitnet-sys = { path = "../bitnet-sys" }
+cerberus-core = { path = "../core" }
+cerberus-bitnet-sys = { path = "../bitnet-sys", optional = true }
 tokio = { workspace = true, features = ["full", "tracing"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
@@ -22,30 +22,30 @@ serde_json = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
 bytes = { workspace = true }
-tonic = { workspace = true }
+tonic = { workspace = true, optional = true }
 prost = { workspace = true, optional = true }
 prost-types = { workspace = true, optional = true }
-rustls = { workspace = true }
+rustls = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true }
-sqlx = { workspace = true }
-redis = { workspace = true }
-rocksdb = { workspace = true }
-lmdb = { workspace = true }
-config = { workspace = true }
-figment = { workspace = true }
-metrics = { workspace = true }
-prometheus = { workspace = true }
-opentelemetry = { workspace = true }
-opentelemetry-otlp = { workspace = true }
-opentelemetry_sdk = { workspace = true }
-clap = { workspace = true }
-ort = "2.0.0-rc.14"
-tract = { version = "0.23", features = ["default"] }
-llama-cpp-2 = { version = "0.1" }
-candle = { package = "candle-core", version = "0.8" }
-candle-nn = { version = "0.8" }
-candle-transformers = { version = "0.8" }
-num_cpus = "1.16"
+sqlx = { workspace = true, optional = true }
+redis = { workspace = true, optional = true }
+rocksdb = { workspace = true, optional = true }
+lmdb = { workspace = true, optional = true }
+config = { workspace = true, optional = true }
+figment = { workspace = true, optional = true }
+metrics = { workspace = true, optional = true }
+prometheus = { workspace = true, optional = true }
+opentelemetry = { workspace = true, optional = true }
+opentelemetry-otlp = { workspace = true, optional = true }
+opentelemetry_sdk = { workspace = true, optional = true }
+clap = { workspace = true, optional = true }
+ort = { version = "2.0.0-rc.14", optional = true }
+tract = { version = "0.23", features = ["default"], optional = true }
+llama-cpp-2 = { version = "0.1", optional = true }
+candle = { package = "candle-core", version = "0.8", optional = true }
+candle-nn = { version = "0.8", optional = true }
+candle-transformers = { version = "0.8", optional = true }
+num_cpus = { version = "1.16", optional = true }
 
 [dev-dependencies]
 testcontainers = { workspace = true }
@@ -55,9 +55,39 @@ mockall = { workspace = true }
 [[bin]]
 name = "fenrir"
 path = "src/main.rs"
+required-features = ["cli"]
 
 [features]
 default = []
-bitnet = []
+# Pure-Rust detection stack (compiles everywhere with zero C toolchain)
+# Includes: dns_anomaly, beaconing, lateral_movement, credential_abuse,
+# binary_reputation, network_recon
+# ML / inference backends (require C toolchains: CMake, clang, OpenSSL, etc.)
+inference = []
+bitnet = ["cerberus-bitnet-sys"]
+onnx = ["ort"]
+llama = ["llama-cpp-2"]
+candle = ["candle-nn"]
 cuda = ["candle/cuda", "candle-nn/cuda"]
 metal = ["candle/metal", "candle-nn/metal"]
+# Storage backends (require C libraries)
+rocksdb = ["dep:rocksdb"]
+lmdb = ["dep:lmdb"]
+# Database
+sqlx = ["dep:sqlx"]
+redis = ["dep:redis"]
+# Configuration
+config = ["dep:config", "dep:figment"]
+# Observability
+observability = ["opentelemetry", "opentelemetry-otlp", "opentelemetry_sdk", "prometheus", "metrics"]
+# gRPC / protobuf (tonic uses rustls+ring which needs a C compiler)
+tonic = ["dep:tonic", "dep:prost", "dep:prost-types", "dep:rustls"]
+prost = ["dep:prost", "dep:prost-types"]
+# CLI binary
+cli = ["dep:clap", "config", "tonic", "prost"]
+# Everything (all C-dependent backends enabled)
+full = [
+    "inference", "bitnet", "onnx", "llama", "candle", "cuda", "metal",
+    "rocksdb", "lmdb", "sqlx", "redis", "config", "observability",
+    "tonic", "prost", "cli", "num_cpus",
+]

@@ -22,6 +22,11 @@ serde_json = { workspace = true }
 uuid = { workspace = true }
 chrono = { workspace = true }
 bytes = { workspace = true }
+# indexmap 1.9.x is #![no_std] by default; tower 0.4.x uses IndexMap<K, V>
+# (two-arg form) which needs indexmap's `S = RandomState` default (has_std).
+# Declaring indexmap here with `std` enables it via feature unification so
+# tower's ready-cache path compiles on this toolchain.
+indexmap = { version = "1.9", features = ["std"] }
 prost = { workspace = true, optional = true }
 prost-types = { workspace = true, optional = true }
 ed25519-dalek = { workspace = true }

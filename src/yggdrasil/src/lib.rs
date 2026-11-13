@@ -9,9 +9,12 @@ pub mod models;
 pub mod storage;
 
 pub use models::{BehavioralBaseline, DeviceEntity, EntityRecord, ProcessEntity, TrustScoreRecord, UserEntity};
+
+#[cfg(feature = "rocksdb")]
 pub use storage::RocksYggdrasilStore;
 
 #[cfg(test)]
+#[cfg(feature = "rocksdb")]
 mod tests {
     use super::*;
     use cerberus_core::observation::{Evidence, Observation, ObservationType};

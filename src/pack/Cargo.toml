@@ -34,8 +34,6 @@ hex = { workspace = true }
 time = { version = "0.3", default-features = false }
 sqlx = { workspace = true }
 redis = { workspace = true }
-rocksdb = { workspace = true }
-lmdb = { workspace = true }
 config = { workspace = true }
 figment = { workspace = true }
 metrics = { workspace = true }

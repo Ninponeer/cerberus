@@ -210,6 +210,7 @@ pub enum DetectionDomain {
     CredentialAbuse,
     LateralMovement,
     NetworkRecon,
+    IotDiscovery,
 }
 
 /// Model specification for loading

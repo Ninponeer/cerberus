@@ -15,6 +15,8 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 cerberus-core = { workspace = true, features = ["prost"] }
+cerberus-garmr = { workspace = true }
+cerberus-orthrus = { workspace = true }
 tokio = { workspace = true, features = ["full", "tracing"] }
 tracing = { workspace = true }
 anyhow = { workspace = true }
@@ -27,25 +29,23 @@ tonic = { workspace = true }
 prost = { workspace = true }
 rustls = { workspace = true }
 ed25519-dalek = { workspace = true }
-sqlx = { workspace = true }
-redis = { workspace = true }
 config = { workspace = true }
-figment = { workspace = true }
 reqwest = { workspace = true }
 url = { workspace = true }
 miette = { workspace = true }
 zeroize = { workspace = true }
 secrecy = { workspace = true }
+dirs = { workspace = true }
+toml = { workspace = true }
+hex = { workspace = true }
 
 # Python bindings (optional feature)
 pyo3 = { workspace = true, optional = true }
 
 [features]
 default = []
-pyo3 = ["pyo3"]
+pyo3 = ["dep:pyo3"]
 proto = ["cerberus-core/prost"]
 
 [dev-dependencies]
-testcontainers = { workspace = true }
 mockall = { workspace = true }
-proptest = { workspace = true }

@@ -7,42 +7,47 @@ members = [
 exclude = ["python"]
 
 [workspace.package]
-version = { workspace = true }
-edition = { workspace = true }
-license = { workspace = true }
-repository = { workspace = true }
-authors = { workspace = true }
+version = "0.1.0"
+edition = "2024"
+license = "AGPL-3.0-only"
+repository = "https://github.com/cerberus-project/cerberus"
+authors = ["Cerberus Team <team@cerberus.local>"]
 categories = ["command-line-utilities", "network-programming", "security"]
 keywords = ["cerberus", "shepherd", "c2c", "management-plane"]
 
 [workspace.dependencies]
 # Core
 cerberus-core = { path = "../src/core", features = ["prost"] }
-cerberus-proto = { path = "../src/proto", optional = true }
-tokio = { workspace = true }
-tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
-anyhow = { workspace = true }
-thiserror = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-uuid = { workspace = true }
-chrono = { workspace = true }
-bytes = { workspace = true }
-tonic = { workspace = true }
-prost = { workspace = true }
-rustls = { workspace = true }
-ed25519-dalek = { workspace = true }
-sqlx = { workspace = true }
-redis = { workspace = true }
-config = { workspace = true }
-figment = { workspace = true }
-metrics = { workspace = true }
-prometheus = { workspace = true }
-opentelemetry = { workspace = true }
-opentelemetry-otlp = { workspace = true }
-opentelemetry-sdk = { workspace = true }
-clap = { workspace = true }
+cerberus-yggdrasil = { path = "../src/yggdrasil", features = ["rocksdb"] }
+cerberus-garmr = { path = "../src/garmr" }
+cerberus-orthrus = { path = "../src/orthrus" }
+cerberus-proto = { path = "../src/proto" }
+tokio = { version = "1.40", features = ["full", "tracing"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json", "fmt"] }
+anyhow = "1.0"
+thiserror = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+uuid = { version = "1.8", features = ["v4", "v7", "serde", "fast-rng"] }
+chrono = { version = "0.4", features = ["serde"] }
+bytes = "1.5"
+tonic = { version = "0.12", features = ["tls", "tls-roots"] }
+prost = "0.13"
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+ed25519-dalek = { version = "2.1", features = ["rand_core", "serde", "zeroize"] }
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "postgres", "uuid", "chrono", "json", "migrate"] }
+redis = { version = "0.24", features = ["tokio-comp", "connection-manager", "script"] }
+config = { version = "0.14", features = ["toml", "json"] }
+figment = { version = "0.10", features = ["toml", "json", "env"] }
+metrics = "0.22"
+prometheus = { version = "0.13", features = ["process"] }
+opentelemetry = { version = "0.33", features = ["trace", "metrics"] }
+opentelemetry-otlp = { version = "0.33", features = ["tonic"] }
+opentelemetry-sdk = { version = "0.33", features = ["trace", "metrics", "rt-tokio"] }
+clap = { version = "4.5", features = ["derive", "env", "help", "usage", "string", "wrap_help"] }
+zeroize = "1.8"
+secrecy = "0.10"
 
 # Shepherd specific
 spiffe = "0.1"
@@ -53,11 +58,13 @@ miette = "7.0"
 console = "0.15"
 indicatif = "0.17"
 dialoguer = "0.11"
-zeroize = { workspace = true }
-secrecy = { workspace = true }
+mockall = "0.12"
+dirs = "5.0"
+toml = "0.8"
+hex = "0.4"
 
 # Python bindings (PyO3)
-pyo3 = { version = "0.22", features = ["extension-module", "abi3-py38", "generate-abi3"] }
+pyo3 = { version = "0.22", features = ["extension-module", "abi3-py38"] }
 maturin = "1.7"
 
 [profile.dev]

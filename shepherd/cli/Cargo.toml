@@ -16,6 +16,7 @@ path = "src/main.rs"
 [dependencies]
 cerberus-shepherd-lib = { path = "../lib" }
 cerberus-core = { workspace = true }
+cerberus-orthrus = { workspace = true }
 tokio = { workspace = true, features = ["full", "tracing"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
@@ -32,6 +33,7 @@ reqwest = { workspace = true }
 url = { workspace = true }
 config = { workspace = true }
 figment = { workspace = true }
+uuid = { workspace = true, features = ["v7"] }
 
 [dev-dependencies]
 mockall = { workspace = true }

@@ -272,7 +272,7 @@ Thresholds:
 - **The Leashed Warhound:** Operates strictly under human-signed Ed25519 authorization tokens from Shepherd (`StrikeMandate`), bounded strictly to declared IP targets.
 - **Cognitive Attack Modeling:** Infers target-specific credentials and configuration vulnerabilities using Bayesian and contextual LLM reasoning rather than brute force.
 - **Purple Validation:** Probes internal assets to verify that Fenrir catches intrusions; detection gaps trigger automated weight tuning.
-- **Reference Spec:** [hati.md](file:///C:/bitbucket/cerberus/specs/hati.md)
+- **Reference Spec:** [hati.md](./hati.md)
 
 ---
 
@@ -283,7 +283,7 @@ Thresholds:
 
 - **The Surgical Purge:** Eradicates malware process lineages, memory hooks, scheduled tasks, registry Run keys, systemd units, and re-flashes verified firmware over Bifröst/PXE.
 - **The Turncoat (Honey-Puppet):** Transmutes compromised endpoints into active sovereign sensor taps, sinkholing adversary C2 traffic into deception sandboxes and harvesting enemy tools and lateral movement intelligence.
-- **Reference Spec:** [vidar.md](file:///C:/bitbucket/cerberus/specs/vidar.md)
+- **Reference Spec:** [vidar.md](./vidar.md)
 
 ---
 
